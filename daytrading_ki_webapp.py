@@ -11,7 +11,8 @@ st.markdown("Dieses Tool zeigt dir die aktuellen **Kauf-/Verkaufssignale** mit H
 df = yf.download("BTC-USD", interval="5m", period="5d")
 df.dropna(inplace=True)
 
-df['rsi'] = ta.momentum.RSIIndicator(close=df['Close'], window=14).rsi()
+rsi = ta.momentum.RSIIndicator(close=df['Close'], window=14)
+df['rsi'] = rsi.rsi().fillna(0)
 df['ema_fast'] = ta.trend.EMAIndicator(close=df['Close'], window=9).ema_indicator()
 df['ema_slow'] = ta.trend.EMAIndicator(close=df['Close'], window=21).ema_indicator()
 macd = ta.trend.MACD(close=df['Close'])
