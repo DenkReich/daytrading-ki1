@@ -3,10 +3,8 @@ import pandas as pd
 import yfinance as yf
 import ta
 
-# Seite konfigurieren
-st.set_page_config(page_title="Krypto Daytrading KI", layout="centered")
+st.set_page_config(page_title="Krypto Daytrading KI – 5-Minuten Signale")
 
-# Titel und Beschreibung
 st.title("📉 Krypto Daytrading KI – 5-Minuten Signale")
 st.markdown("Dieses Tool zeigt dir Kauf-/Verkaufssignale für BTC/USD basierend auf RSI und EMA.")
 
@@ -14,15 +12,12 @@ st.markdown("Dieses Tool zeigt dir Kauf-/Verkaufssignale für BTC/USD basierend 
 df = yf.download("BTC-USD", interval="5m", period="1d")
 df.dropna(inplace=True)
 
-# Spalte "Close" extrahieren
-close = df['Close']
+# RSI & EMA berechnen
+df['rsi'] = ta.momentum.RSIIndicator(close=df['Close']).rsi()
+df['ema_fast'] = ta.trend.EMAIndicator(close=df['Close'], window=9).ema_indicator()
+df['ema_slow'] = ta.trend.EMAIndicator(close=df['Close'], window=21).ema_indicator()
 
-# Indikatoren berechnen
-df['rsi'] = ta.momentum.RSIIndicator(close).rsi()
-df['ema_fast'] = ta.trend.EMAIndicator(close, window=9).ema_indicator()
-df['ema_slow'] = ta.trend.EMAIndicator(close, window=21).ema_indicator()
-
-# Handelssignal basierend auf RSI & EMA
+# Signal-Logik
 def generate_signal(row):
     if row['rsi'] < 30 and row['ema_fast'] > row['ema_slow']:
         return 'BUY'
@@ -34,9 +29,8 @@ def generate_signal(row):
 df['signal'] = df.apply(generate_signal, axis=1)
 
 # Letztes Signal anzeigen
-last_signal = df['signal'].iloc[-1]
-st.subheader("Aktuelles Signal:")
-st.markdown(f"### 🟢 {last_signal}" if last_signal == "BUY" else f"### 🔴 {last_signal}" if last_signal == "SELL" else "### ⚪️ HOLD")
+st.subheader("Aktuelles Signal")
+st.write(df[['Close', 'rsi', 'ema_fast', 'ema_slow', 'signal']].tail(1))
 
-# Vorschau anzeigen
+# Chart anzeigen
 st.line_chart(df[['Close', 'ema_fast', 'ema_slow']])
