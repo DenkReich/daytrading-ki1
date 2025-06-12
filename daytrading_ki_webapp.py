@@ -12,7 +12,7 @@ df = yf.download("BTC-USD", interval="5m", period="1d")
 df.dropna(inplace=True)
 
 # Technische Indikatoren berechnen
-df['rsi'] = ta.momentum.RSIIndicator(close=df['Close']).rsi()
+df['rsi'] = ta.momentum.RSIIndicator(df['close']).rsi()
 df['ema_fast'] = ta.trend.EMAIndicator(close=df['Close'], window=9).ema_indicator()
 df['ema_slow'] = ta.trend.EMAIndicator(close=df['Close'], window=21).ema_indicator()
 
